@@ -44,8 +44,12 @@ class QuestionService:
 
     @staticmethod
     def update_question(id, data):
+        print(data)
         question = Question.query.get_or_404(id)
-        question.text = data['text']
+        print(question)
+        question.text = data.get('text', question.text)
+        question.modified_by = int(data.get('modified_by', question.modified_by))
+        question.state = data.get('state', question.state)
         question.category_id = data.get('category_id', question.category_id)
         db.session.commit()
         return question

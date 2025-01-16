@@ -2,6 +2,8 @@ from extensions import db
 from datetime import datetime
 import datetime as dt
 
+from app.utils.lib.pretty import pretty_print_dict
+
 class Category(db.Model):
     __tablename__ = 'categories'
     
@@ -47,9 +49,14 @@ class Question(db.Model):
             "category_id": self.category_id,
             "state": self.state,
             "created_by": self.created_by,
+            "modified_by": self.modified_by,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+    def __repr__(self):
+        # return f"<Question {self.to_dict()}>"
+        pretty_print_dict(self.to_dict())
+        return ""
 
 class Answer(db.Model):
     __tablename__ = 'answers'

@@ -34,3 +34,20 @@ class AnswerService:
         db.session.commit()
         # db.session.refresh(answers)  # Sincroniza los IDs generados
         return answers
+    
+    @staticmethod
+    def delete_answers_by_question_id(question_id):
+        """
+        Elimina todas las respuestas asociadas a una pregunta específica.
+        :param question_id: ID de la pregunta cuyas respuestas deben ser eliminadas.
+        """
+        if not question_id:
+            raise ValueError("A valid 'question_id' is required.")
+
+        try:
+            # Eliminar todas las respuestas asociadas al question_id
+            db.session.query(Answer).filter_by(question_id=question_id).delete()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise RuntimeError(f"Error while deleting answers for question_id {question_id}: {e}")
