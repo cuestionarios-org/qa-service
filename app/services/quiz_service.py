@@ -41,32 +41,6 @@ class QuizService:
         )
 
     @staticmethod
-    def create_quiz(data):
-        """
-        Crea un nuevo cuestionario con las preguntas relacionadas.
-        """
-        quiz = Quiz(
-            title=data['title'],
-            description=data['description'],
-            created_by=data['created_by'],
-            modified_by=data['created_by'],
-            category_id=data['category_id'],
-            time_limit=data.get('time_limit', None),
-            state=data.get('state', 'preparacion'),  # Estado predeterminado
-            is_public=data.get('is_public', True),
-            access_code=data.get('access_code', None),
-            publish_at=data.get('publish_at', None)
-        )
-        
-        try:
-            db.session.add(quiz)
-            db.session.commit()
-            return quiz
-        except IntegrityError:
-            db.session.rollback()
-            raise ValueError(f"El cuestionario con título '{data['title']}' ya existe en la categoría.")
-    
-    @staticmethod
     def create_quiz_with_existing_questions(quiz_data, question_ids=None):
         """
         Crea un cuestionario y asocia preguntas existentes mediante sus IDs.
@@ -194,50 +168,3 @@ class QuizService:
             db.session.rollback()
             raise ValueError(f"No se puede cambiar el estado: {str(e)}")
 
-
-    @staticmethod
-    def add_question_to_quiz(quiz_id, question_id):
-        """
-        Agrega una pregunta a un cuestionario si la transición es válida y la pregunta no está ya asociada.
-        """
-        try:
-            # Obtener el cuestionario y la pregunta
-            quiz = Quiz.query.get_or_404(quiz_id)
-            question = Question.query.get_or_404(question_id)
-            
-            # Verificar el estado del cuestionario
-            if quiz.state != 'preparacion':
-                raise ValueError(f"No se puede agregar preguntas a un cuestionario en estado '{quiz.state}'. El estado debe ser 'preparcion'.")
-
-            # Verificar si la pregunta ya está asociada al cuestionario
-            if question in quiz.questions:
-                raise ValueError(f"La pregunta '{question.text}' ya está asociada a este cuestionario.")
-            
-            # Agregar la pregunta al cuestionario
-            quiz.questions.append(question)
-            db.session.commit()
-
-            return quiz
-        
-        except ValueError as e:
-            # Si hay un error de validación, se puede manejar aquí
-            db.session.rollback()  # Hacemos rollback en caso de error
-            raise ValueError(f"Error al agregar la pregunta: {str(e)}")
-        
-        except Exception as e:
-            # Capturamos cualquier otro tipo de excepción
-            db.session.rollback()
-            raise Exception(f"Ocurrió un error inesperado al agregar la pregunta: {str(e)}")
-
-
-    @staticmethod
-    def remove_question_from_quiz(quiz_id, question_id):
-        """
-        Elimina una pregunta de un cuestionario.
-        """
-        quiz = Quiz.query.get_or_404(quiz_id)
-        question = Question.query.get_or_404(question_id)
-        if question in quiz.questions:
-            quiz.questions.remove(question)
-            db.session.commit()
-        return quiz
