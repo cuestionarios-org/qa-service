@@ -12,7 +12,27 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Volumen gestionado por Docker
+    networks:
+      - my-network  # Especificamos la misma red
+
+  qa-service:
+    build:
+      context: .
+    ports:
+      - "5003:5003"  # Puerto en el que se expone el servicio
+    env_file:
+      - .env  # Archivo de configuración de entorno
+    depends_on:
+      - postgres  # Asegurarse de que postgres esté listo antes de iniciar el servicio
+    networks:
+      - my-network  # Especificamos la misma red
+    volumes:
+      - .:/app
 
 volumes:
   postgres_data:  # Docker se encarga de gestionarlo
     external: false
+
+networks:
+  my-network:   # Definimos la red
+    driver: bridge

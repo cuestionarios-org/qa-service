@@ -5,17 +5,31 @@ WORKDIR /app
 
 # Copia los archivos de tu proyecto al contenedor
 COPY . /app
+# Copiar el archivo entrypoint.sh
+COPY entrypoint.sh /app/entrypoint.sh
 
+# Asegurar permisos de ejecución para el archivo
+RUN chmod +x /app/entrypoint.sh
 # Instala las dependencias del proyecto
 RUN pip install -r requirements.txt
 
-# Espera a que PostgreSQL esté disponible
-RUN apt-get update && apt-get install -y netcat
-COPY wait-for-it.sh /wait-for-it.sh
-RUN chmod +x /wait-for-it.sh
+# Instalar Dockerize para ARM64 o x86_64
+RUN apt-get update && apt-get install -y curl && \
+    # Comprobamos la arquitectura para descargar la versión correcta de Dockerize
+    ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+      curl -sSL https://github.com/jwilder/dockerize/releases/download/v0.9.2/dockerize-linux-amd64-v0.9.2.tar.gz | tar xzf - -C /usr/local/bin; \
+    else \
+      curl -sSL https://github.com/jwilder/dockerize/releases/download/v0.9.2/dockerize-linux-arm64-v0.9.2.tar.gz | tar xzf - -C /usr/local/bin; \
+    fi && \
+    apt-get autoremove -yqq --purge curl && rm -rf /var/lib/apt/lists/*
 
 # Expón el puerto en el que el servicio de QA estará corriendo
 EXPOSE 5003
 
-# Ejecuta wait-for-it para esperar a PostgreSQL y luego iniciar la aplicación
-CMD ["/wait-for-it.sh", "postgres:5432", "--", "python", "run.py"]
+# Espera a que PostgreSQL esté disponible y luego inicia la aplicación
+# CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "30s", "python", "run.py"]
+# CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "30s", "flask", "db", "upgrade",  "python", "run.py"]
+# Establecer el archivo de entrada como comando principal
+CMD ["/app/entrypoint.sh"]
+

@@ -1,20 +1,16 @@
 import os
-# Establecer la variable FLASK_APP programáticamente
-# os.environ['FLASK_APP'] = 'run.py'
 
 from flask import Flask, jsonify
 from app.config import config_dict
 from extensions import db, migrate
 from app.routes.categories import category_bp
-from app.routes.question_answers import question_bp
+from app.routes.questions import question_bp
 from sqlalchemy import text
 
 from seeders import run_seeders
 
 from app.utils.errors.handlers import register_error_handlers
 
-
-# from utils.errors.handlers import register_error_handlers
 
 def create_app(config_name='development'):
     app = Flask(__name__)
@@ -61,6 +57,5 @@ if __name__ == '__main__':
     import os
     env = os.getenv('FLASK_ENV', 'development')
     app = create_app(env)
-    # app.run(port=5001)
     app.run(host='0.0.0.0', port=5003, debug=True)
 
