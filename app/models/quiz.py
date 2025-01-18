@@ -3,6 +3,7 @@ from sqlalchemy.orm import validates
 import datetime as dt
 from .category import Category
 from .question import Question
+from app.utils.lib.pretty import pretty_print_dict
 
 
 class Quiz(db.Model):
@@ -60,7 +61,8 @@ class Quiz(db.Model):
         self.state = new_state
 
     def __repr__(self):
-        return f"<Quiz {self.title}>"
+        pretty_print_dict(self.to_dict())
+        return ""
 
     def to_dict(self):
         return {

@@ -5,6 +5,7 @@ from app.config import config_dict
 from extensions import db, migrate
 from app.routes.categories import category_bp
 from app.routes.questions import question_bp
+from app.routes.quizzes import quiz_bp
 from sqlalchemy import text
 
 from seeders import run_seeders
@@ -21,6 +22,7 @@ def create_app(config_name='development'):
 
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(question_bp, url_prefix='/questions')
+    app.register_blueprint(quiz_bp, url_prefix='/quizzes')
     
     @app.route('/')
     def index():
