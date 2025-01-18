@@ -1,5 +1,5 @@
 from flask import Blueprint,request, jsonify
-from app.services.category_service import CategoryService  # Asegúrate de implementar este servicio
+from app.services import CategoryService  # Asegúrate de implementar este servicio
 
 
 category_bp = Blueprint('category', __name__)

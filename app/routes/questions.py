@@ -1,8 +1,8 @@
 # app/routes/question_answers.py
 
 from flask import Blueprint, request, jsonify
-from app.services.question_service import QuestionService
-from app.services.answer_service import AnswerService
+from app.services import QuestionService
+from app.services import AnswerService
 
 question_bp = Blueprint('question', __name__)
 
