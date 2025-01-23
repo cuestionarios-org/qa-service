@@ -7,8 +7,7 @@ from app.routes.categories import category_bp
 from app.routes.questions import question_bp
 from app.routes.quizzes import quiz_bp
 from sqlalchemy import text
-
-from seeders import run_seeders
+from app.utils.commands.cli import seed, init_db
 
 from app.utils.errors.handlers import register_error_handlers
 
@@ -16,9 +15,15 @@ from app.utils.errors.handlers import register_error_handlers
 def create_app(config_name='development'):
     app = Flask(__name__)
     app.config.from_object(config_dict[config_name])
+    print("Configuración:", app.config['SQLALCHEMY_DATABASE_URI'])
+
+
     
     db.init_app(app)
     migrate.init_app(app, db)
+
+    app.cli.add_command(init_db)
+    app.cli.add_command(seed)
 
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(question_bp, url_prefix='/questions')
@@ -41,18 +46,9 @@ def create_app(config_name='development'):
         except Exception as e:
             return jsonify({'status': 'error', 'message': str(e)}), 500
     
-    # Registrar comandos personalizados
-    @app.cli.command("seed")
-    def seed():
-        """Ejecuta todos los seeders."""
-        print("Ejecutando seeders...")
-        run_seeders()
-        print("Seeders completados con éxito.")
-
-    # Registra manejadores de errores
     
     register_error_handlers(app)
-    
+
     return app
 
 if __name__ == '__main__':

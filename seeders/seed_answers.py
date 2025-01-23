@@ -1,4 +1,5 @@
 from faker import Faker
+from sqlalchemy.exc import IntegrityError
 from app.models import Answer, Question
 from extensions import db
 
@@ -25,26 +26,31 @@ def seed_answers():
         return
 
     for question in questions:
-        # Verifica si hay respuestas predefinidas para la pregunta
-        if question.text in predefined_answers:
-            answers_data = predefined_answers[question.text]
-            for answer_data in answers_data:
-                answer = Answer(
-                    question_id=question.id,
-                    text=answer_data["text"],
-                    is_correct=answer_data["is_correct"],
-                )
-                db.session.add(answer)
-        else:
-            # Genera de 2 a 5 respuestas aleatorias si no hay predefinidas
-            num_answers = fake.random_int(min=2, max=5)
-            for i in range(num_answers):
-                answer = Answer(
-                    question_id=question.id,
-                    text=fake.sentence(nb_words=5),
-                    is_correct=(i == 0),  # Marca la primera como correcta
-                )
-                db.session.add(answer)
+        try:
+            # Verifica si hay respuestas predefinidas para la pregunta
+            if question.text in predefined_answers:
+                answers_data = predefined_answers[question.text]
+                for answer_data in answers_data:
+                    answer = Answer(
+                        question_id=question.id,
+                        text=answer_data["text"],
+                        is_correct=answer_data["is_correct"],
+                    )
+                    db.session.add(answer)
+                    db.session.commit()  # Guarda inmediatamente para manejar conflictos
+            else:
+                # Genera de 2 a 5 respuestas aleatorias si no hay predefinidas
+                num_answers = fake.random_int(min=2, max=5)
+                for i in range(num_answers):
+                    answer = Answer(
+                        question_id=question.id,
+                        text=fake.sentence(nb_words=5),
+                        is_correct=(i == 0),  # Marca la primera como correcta
+                    )
+                    db.session.add(answer)
+                    db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            print(f"Respuestas duplicadas detectadas para la pregunta '{question.text}'. Saltando...")
 
-    db.session.commit()
     print("Respuestas creadas con éxito.")

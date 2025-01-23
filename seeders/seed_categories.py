@@ -1,6 +1,7 @@
 from faker import Faker
 from app.models import Category
 from extensions import db
+from sqlalchemy.exc import IntegrityError
 
 fake = Faker('es_MX')
 
@@ -19,8 +20,8 @@ predefined_categories = [
 ]
 
 def seed_categories():
-    if predefined_categories:
-        for category_data in predefined_categories:
+    for category_data in predefined_categories:
+        try:
             category = Category(
                 name=category_data['name'],
                 description=category_data['description'],
@@ -28,15 +29,25 @@ def seed_categories():
                 updated_at=fake.date_time_this_year(),
             )
             db.session.add(category)
-    else:
-        for _ in range(10):  # Genera 10 categorías si no hay predefinidas
-            category = Category(
-                name=fake.unique.word().capitalize(),
-                description=fake.sentence(),
-                created_at=fake.date_time_this_year(),
-                updated_at=fake.date_time_this_year(),
-            )
-            db.session.add(category)
-    
-    db.session.commit()
+            db.session.commit()  # Intenta guardar inmediatamente para manejar conflictos
+        except IntegrityError:
+            db.session.rollback()  # Revierte cualquier cambio si hay un error
+            print(f"Categoría '{category_data['name']}' ya existe. Saltando...")
+
+    # Genera categorías aleatorias si no hay predefinidas
+    if not predefined_categories:
+        for _ in range(10):
+            try:
+                category = Category(
+                    name=fake.unique.word().capitalize(),
+                    description=fake.sentence(),
+                    created_at=fake.date_time_this_year(),
+                    updated_at=fake.date_time_this_year(),
+                )
+                db.session.add(category)
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                print(f"Categoría generada aleatoriamente ya existe. Intentando otra...")
+
     print("Categorías creadas con éxito.")

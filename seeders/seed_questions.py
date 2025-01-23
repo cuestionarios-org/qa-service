@@ -1,5 +1,6 @@
 from faker import Faker
 from app.models import Question, Category
+from sqlalchemy.exc import IntegrityError
 from extensions import db
 
 fake = Faker('es_ES')
@@ -17,7 +18,6 @@ predefined_questions = [
     {"text": "¿Cuáles son las tendencias de moda actuales?", "category": "Moda", "difficulty": "medium"},
     {"text": "¿Qué es la inflación y cómo afecta la economía?", "category": "Finanzas", "difficulty": "hard"},
 ]
-
 def seed_questions():
     categories = Category.query.all()
     if not categories:
@@ -27,35 +27,47 @@ def seed_questions():
     if predefined_questions:
         # Crear preguntas a partir del listado predefinido
         for question_data in predefined_questions:
-            # Buscar la categoría correspondiente
-            category = next((cat for cat in categories if cat.name == question_data["category"]), None)
-            if category:
+            try:
+                # Buscar la categoría correspondiente
+                category = next((cat for cat in categories if cat.name == question_data["category"]), None)
+                if category:
+                    question = Question(
+                        text=question_data["text"],
+                        category_id=category.id,
+                        state="published",
+                        created_by=fake.random_int(min=1, max=5),
+                        modified_by=fake.random_int(min=1, max=5),
+                        created_at=fake.date_time_this_year(),
+                        updated_at=fake.date_time_this_year(),
+                        meta_data={"difficulty": question_data["difficulty"]},
+                    )
+                    db.session.add(question)
+                    db.session.commit()  # Guarda inmediatamente para manejar conflictos
+                else:
+                    print(f"Categoría '{question_data['category']}' no encontrada. Pregunta omitida.")
+            except IntegrityError:
+                db.session.rollback()
+                print(f"Pregunta '{question_data['text']}' ya existe. Saltando...")
+
+    # Crear preguntas generadas automáticamente
+    else:
+        for _ in range(20):
+            try:
+                category = fake.random.choice(categories)
                 question = Question(
-                    text=question_data["text"],
+                    text=fake.sentence(nb_words=10),
                     category_id=category.id,
-                    state="published",
+                    state=fake.random.choice(['draft', 'published']),
                     created_by=fake.random_int(min=1, max=5),
                     modified_by=fake.random_int(min=1, max=5),
                     created_at=fake.date_time_this_year(),
                     updated_at=fake.date_time_this_year(),
-                    meta_data={"difficulty": question_data["difficulty"]},
+                    meta_data={"difficulty": fake.random.choice(["easy", "medium", "hard"])},
                 )
                 db.session.add(question)
-    else:
-        # Crear preguntas generadas automáticamente
-        for _ in range(20):
-            category = fake.random.choice(categories)
-            question = Question(
-                text=fake.sentence(nb_words=10),
-                category_id=category.id,
-                state=fake.random.choice(['draft', 'published']),
-                created_by=fake.random_int(min=1, max=5),
-                modified_by=fake.random_int(min=1, max=5),
-                created_at=fake.date_time_this_year(),
-                updated_at=fake.date_time_this_year(),
-                meta_data={"difficulty": fake.random.choice(["easy", "medium", "hard"])},
-            )
-            db.session.add(question)
+                db.session.commit()
+            except IntegrityError:
+                db.session.rollback()
+                print(f"Pregunta generada ya existe. Intentando otra...")
 
-    db.session.commit()
     print("Preguntas creadas con éxito.")
