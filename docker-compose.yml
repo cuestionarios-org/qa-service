@@ -1,33 +1,18 @@
 version: '3.8'
 
 services:
-  postgres:
+  postgres-qa-dev:
     image: postgres:15
-    container_name: postgres_container
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin1234
-      POSTGRES_DB: db_aq
+    container_name: postgres-qa-dev
+    env_file:
+      - .env
     ports:
-      - "5432:5432"
+      - "5462:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data  # Volumen gestionado por Docker
+    restart: always
     networks:
-      - my-network  # Especificamos la misma red
-
-  qa-service:
-    build:
-      context: .
-    ports:
-      - "5003:5003"  # Puerto en el que se expone el servicio
-    env_file:
-      - .env  # Archivo de configuración de entorno
-    depends_on:
-      - postgres  # Asegurarse de que postgres esté listo antes de iniciar el servicio
-    networks:
-      - my-network  # Especificamos la misma red
-    volumes:
-      - .:/app
+      - my-network  # Especificamos la misma red para que se puedan comunicar
 
 volumes:
   postgres_data:  # Docker se encarga de gestionarlo
