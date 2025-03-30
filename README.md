@@ -85,25 +85,16 @@ qa-service/
 
 ## ⚙️ Configuración
 
-1. Configura las variables de entorno en un archivo `.env` en la raíz del proyecto:
-    ```env
-    FLASK_APP=app
-    FLASK_ENV=development
-    DATABASE_URL=postgresql://usuario:contraseña@localhost/qa_service
-    ```
+1. Configura las variables de entorno en un archivo `.env` en la raíz del proyecto, deberian ser las ue estan en `.example-env`
+
 
 2. Asegurarse de tener la Base de datos corriendo.
     - para ellos puede ejecutar el contenedor.
     ```bash
-    docker-compose up -d
+    docker-compose up --build
     ```
 
-3. Genera las migraciones de base de datos y aplícalas:
-    ```bash
-    flask db init
-    flask db migrate -m "Initial migration"
-    flask db upgrade
-    ```
+3. No es necesario aplicar migraciones, ya al ejecutar la app quedara la db montada y con datos de prueba.
 
 ## 🚀 Ejecución
 
@@ -139,17 +130,6 @@ El servicio estará disponible en `http://127.0.0.1:5003`.
 - `PUT /responses/<id>`: Actualizar una respuesta.
 - `DELETE /responses/<id>`: Eliminar una respuesta.
 
-## 🐳 Docker NO IMPLEMENTADO AUN
-
-1. Construye la imagen de Docker:
-    ```bash
-    docker build -t qa-service .
-    ```
-
-2. Ejecuta el contenedor:
-    ```bash
-    docker-compose up
-    ```
 
 ## 🖍️ Licencia
 
