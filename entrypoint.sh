@@ -18,14 +18,5 @@ if [ $? -ne 0 ]; then
 fi
 
 
-flask init_db
-echo "Base de datos inicializada"
-
-
-# Ejecuta las migraciones de la base de datos
-flask db upgrade
-echo "Base de datos disponible"
-
-
 # Inicia la aplicación
 python run.py
