@@ -91,6 +91,8 @@ def create_database_if_not_exists(app):
 if __name__ == '__main__':
     import os
     env = os.getenv('FLASK_ENV', 'development')
+    PORT = os.getenv('QA_PORT', 5013)
     app = create_app(env)
-    app.run(host='0.0.0.0', port=5003, debug=True)
+    print(f"🚀 Aplicación Flask corriendo en http://localhost:{PORT} en modo {env}")
+    app.run(host='0.0.0.0', port=PORT, debug=True)
 
