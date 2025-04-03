@@ -2,6 +2,7 @@ from flask import jsonify
 from app.utils.errors.CustomException import CustomException
 from app.utils.logs.logger_config import setup_logging
 import logging
+from sqlalchemy.exc import OperationalError
 
 # Configurar logging al iniciar la aplicación
 setup_logging()
@@ -18,6 +19,15 @@ def register_error_handlers(app):
         response = jsonify(error.to_dict())
         response.status_code = error.code
         return response
+
+# Middleware para capturar errores globales
+    @app.errorhandler(OperationalError)
+    def handle_db_connection_error(e):
+        print(f"🔴 Error de conexión a la base de datos: {e}")
+        return jsonify({
+            "error": "No se pudo conectar a la base de datos",
+            "details": "Asegúrate de que el servidor PostgreSQL esté corriendo."
+        }), 500
 
     @app.errorhandler(404)
     def handle_404(error):

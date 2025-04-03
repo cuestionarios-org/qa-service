@@ -26,7 +26,6 @@ def create_category():
     :statuscode 201: Categoria creada exitosamente
     :statuscode 400: No se proporcionaron los datos necesarios
     """
-    print("XXXXXXX Hola XXXXXXX")
     if not request.is_json:
         return jsonify({"msg": "Missing JSON in request"}), 400
 

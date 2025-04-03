@@ -3,6 +3,7 @@
 from flask import Blueprint, request, jsonify
 from app.services import QuestionService
 from app.services import AnswerService
+from sqlalchemy.exc import SQLAlchemyError
 
 question_bp = Blueprint('question', __name__)
 
@@ -34,30 +35,38 @@ def create_question_with_answers():
 # Ruta para listar todas las preguntas con sus respuestas
 @question_bp.route('/', methods=['GET'])
 def get_all_questions_with_answers():
-    """
-    Lista todas las preguntas con sus respuestas asociadas.
-    """
-    questions = QuestionService.get_all_questions()
-    result = [
-        {
-            'question': question.to_dict(),
-            'answers': [answer.to_dict() for answer in question.answers]
-        }
-        for question in questions
-    ]
-    return jsonify(result), 200
+    try:
+        questions = QuestionService.get_all_questions()
+        if questions is None:
+            return jsonify({"error": "Error al obtener preguntas"}), 500
+
+        result = [
+            {
+                'question': question.to_dict(),
+                'answers': [answer.to_dict() for answer in question.answers]
+            }
+            for question in questions
+        ]
+        return jsonify(result), 200
+    except SQLAlchemyError as e:
+        print(f"❌ Error en la ruta /questions: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # Ruta para obtener una pregunta por ID con sus respuestas
 @question_bp.route('/<int:id>', methods=['GET'])
 def get_question_by_id(id):
-    """
-    Obtiene una pregunta por ID con sus respuestas asociadas.
-    """
-    question = QuestionService.get_question(id)
-    return jsonify({
-        'question': question.to_dict(),
-        'answers': [answer.to_dict() for answer in question.answers]
-    }), 200
+    try:
+        question = QuestionService.get_question(id)
+        if question is None:
+            return jsonify({"error": "Pregunta no encontrada"}), 404
+
+        return jsonify({
+            'question': question.to_dict(),
+            'answers': [answer.to_dict() for answer in question.answers]
+        }), 200
+    except SQLAlchemyError as e:
+        print(f"❌ Error en la ruta /questions/{id}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # Ruta para filtrar preguntas por categoría
 @question_bp.route('/category/<int:category_id>', methods=['GET'])

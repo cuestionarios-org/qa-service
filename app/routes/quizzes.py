@@ -20,7 +20,6 @@ def create_quiz():
 
     quiz_data = data['quiz']
     question_ids = data.get('question_ids', None)  # IDs de preguntas opcionales
-    print(question_ids)
 
     try:
         quiz = QuizService.create_quiz_with_existing_questions(quiz_data, question_ids)
@@ -54,7 +53,6 @@ def get_quiz_by_id(id):
     Obtiene un cuestionario por ID.
     """
     quiz = QuizService.get_quiz(id)
-    print(quiz)
     return jsonify(quiz.to_dict()), 200
 
 # Ruta para obtener cuestionarios por categoría
