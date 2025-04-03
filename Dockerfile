@@ -24,12 +24,13 @@ RUN apt-get update && apt-get install -y curl && \
     fi && \
     apt-get autoremove -yqq --purge curl && rm -rf /var/lib/apt/lists/*
 
-# Expón el puerto en el que el servicio de QA estará corriendo
-EXPOSE 5003
 
-# Espera a que PostgreSQL esté disponible y luego inicia la aplicación
-# CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "30s", "python", "run.py"]
-# CMD ["dockerize", "-wait", "tcp://postgres:5432", "-timeout", "30s", "flask", "db", "upgrade",  "python", "run.py"]
+# Definir el argumento QA_PORT (valor se pasa desde docker-compose)
+ARG QA_PORT=5013
+
+# Definirlo como variable de entorno
+ENV PORT=$QA_PORT
+
 # Establecer el archivo de entrada como comando principal
 CMD ["/app/entrypoint.sh"]
 

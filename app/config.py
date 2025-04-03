@@ -9,7 +9,7 @@ POSTGRES_USER = os.getenv("QA_POSTGRES_USER","admin")
 POSTGRES_PASSWORD = os.getenv("QA_POSTGRES_PASSWORD","admin1234")
 POSTGRES_DB = os.getenv("QA_POSTGRES_DB","db_qa")
 POSTGRES_HOST = os.getenv("QA_POSTGRES_HOST","localhost")
-POSTGRES_PORT = os.getenv("QA_POSTGRES_PORT","5432")
+POSTGRES_PORT = os.getenv("POSTGRES_PORT","5432")
 POSTGRES_DB = os.getenv("QA_POSTGRES_DB","db_qa")
 
 

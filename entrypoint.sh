@@ -11,11 +11,13 @@ fi
 
 
 # Espera a que PostgreSQL esté disponible
-dockerize -wait tcp://$QA_POSTGRES_HOST:$QA_POSTGRES_PORT -timeout 30s
+echo "⏳ Esperando a que PostgreSQL esté listo..."
+dockerize -wait tcp://$QA_POSTGRES_HOST:5432 -timeout 30s
 if [ $? -ne 0 ]; then
-    echo "Error: No se pudo conectar a PostgreSQL en $QA_POSTGRES_HOST:$QA_POSTGRES_PORT"
+    echo "Error: No se pudo conectar a PostgreSQL en $QA_POSTGRES_HOST:5432"
     exit 1
 fi
+echo "✅ PostgreSQL está listo. Iniciando servicio..."
 
 
 # Inicia la aplicación
