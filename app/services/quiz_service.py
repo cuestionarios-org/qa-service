@@ -7,10 +7,21 @@ from sqlalchemy.exc import IntegrityError
 class QuizService:
 
     @staticmethod
-    def get_all_quizzes():
+    def get_all_quizzes(state=None, category_id=None):
         """
-        Obtiene todos los cuestionarios con sus preguntas y categorías relacionadas.
+        Obtiene cuestionarios con filtros opcionales.
+        
+        :param state: Estado del cuestionario ('listo', 'activo', etc.). Puede ser None para traer todos.
+        :param category_id: ID de la categoría para filtrar. Puede ser None para traer todos.
+        :return: Lista de cuestionarios filtrados.
         """
+        query = Quiz.query.options(joinedload(Quiz.questions), joinedload(Quiz.category))
+
+        if state:
+            query = query.filter(Quiz.state == state)
+        
+        if category_id:
+            query = query.filter(Quiz.category_id == category_id)
         return (
             Quiz.query
             .options(joinedload(Quiz.questions), joinedload(Quiz.category))

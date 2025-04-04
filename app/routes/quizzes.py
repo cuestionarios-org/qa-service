@@ -37,7 +37,10 @@ def get_all_quizzes():
     """
     Lista todos los cuestionarios.
     """
-    quizzes = QuizService.get_all_quizzes()
+    state = request.args.get('state')  # Obtiene el estado de la URL (?state=activo)
+    category_id = request.args.get('category_id', type=int)  # Obtiene la categoría (?category_id=3)
+
+    quizzes = QuizService.get_all_quizzes(state=state, category_id=category_id)
     result = []
     for quiz in quizzes:
         quiz_dict = quiz.to_dict()
