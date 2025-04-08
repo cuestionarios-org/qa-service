@@ -51,3 +51,37 @@ class AnswerService:
         except Exception as e:
             db.session.rollback()
             raise RuntimeError(f"Error while deleting answers for question_id {question_id}: {e}")
+
+
+    @staticmethod
+    def validate_bulk_answers(answers_input):
+        """
+        Valida múltiples respuestas y devuelve una lista con los IDs de la respuesta correcta
+        para cada pregunta junto con la respuesta enviada por el usuario.
+        """
+        if not answers_input or not isinstance(answers_input, list):
+            raise BadRequest("'answers' must be a non-empty list of answer objects.")
+
+        results = []
+
+        for item in answers_input:
+            question_id = item.get("question_id")
+            user_answer_id = item.get("answer_id")
+
+            if not question_id or not user_answer_id:
+                continue  # O podrías acumular errores y reportarlos
+
+            correct_answer = Answer.query.filter_by(
+                question_id=question_id, is_correct=True
+            ).first()
+
+            if not correct_answer:
+                continue  # No se encontró respuesta correcta para la pregunta
+
+            results.append({
+                "question_id": question_id,
+                "answer_id": user_answer_id,
+                "correct_answer_id": correct_answer.id
+            })
+
+        return results

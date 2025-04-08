@@ -6,6 +6,7 @@ from extensions import db, migrate
 from app.routes.categories import category_bp
 from app.routes.questions import question_bp
 from app.routes.quizzes import quiz_bp
+from app.routes.answers import answer_bp
 from sqlalchemy import text
 from app.utils.commands.cli import seed, init_db
 from app.utils.errors.handlers import register_error_handlers
@@ -28,6 +29,7 @@ def create_app(config_name='development'):
     app.register_blueprint(category_bp, url_prefix='/categories')
     app.register_blueprint(question_bp, url_prefix='/questions')
     app.register_blueprint(quiz_bp, url_prefix='/quizzes')
+    app.register_blueprint(answer_bp, url_prefix='/answer')
     
     @app.route('/')
     def index():
