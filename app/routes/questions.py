@@ -36,7 +36,11 @@ def create_question_with_answers():
 @question_bp.route('/', methods=['GET'])
 def get_all_questions_with_answers():
     try:
-        questions = QuestionService.get_all_questions()
+        category_id = request.args.get('category_id', type=int)
+        state = request.args.get('state', type=str)
+
+        questions = QuestionService.get_all_questions(category_id, state)
+
         if questions is None:
             return jsonify({"error": "Error al obtener preguntas"}), 500
 
@@ -51,7 +55,7 @@ def get_all_questions_with_answers():
     except SQLAlchemyError as e:
         print(f"❌ Error en la ruta /questions: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
-
+        
 # Ruta para obtener una pregunta por ID con sus respuestas
 @question_bp.route('/<int:id>', methods=['GET'])
 def get_question_by_id(id):

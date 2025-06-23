@@ -2,21 +2,32 @@ from app.models import Question
 from extensions import db
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import and_
 from flask import jsonify
 
 class QuestionService:
 
     @staticmethod
-    def get_all_questions():
+    def get_all_questions(category_id=None, state=None):
         try:
-            return (
-                Question.query
-                .options(joinedload(Question.answers), joinedload(Question.category))
-                .all()
+            filters = []
+            if category_id:
+                filters.append(Question.category_id == category_id)
+            if state:
+                filters.append(Question.state == state)
+
+            query = Question.query.options(
+                joinedload(Question.answers),
+                joinedload(Question.category)
             )
+            if filters:
+                query = query.filter(and_(*filters))
+
+            return query.all()
         except SQLAlchemyError as e:
             print(f"❌ Error al obtener preguntas: {e}")
-            return None  # Dejar que la ruta maneje la respuesta
+            return None
+            
 
     @staticmethod
     def get_question(id):
