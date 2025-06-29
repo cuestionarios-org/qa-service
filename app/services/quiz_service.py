@@ -226,3 +226,29 @@ class QuizService:
             quiz.questions.remove(question)
             db.session.commit()
         return quiz
+
+    @staticmethod
+    def get_quiz_with_questions_and_answers(id):
+        """
+        Obtiene un cuestionario por su id, incluyendo preguntas y respuestas.
+        """
+        from app.models.answer import Answer  # Importación directa para usar la clase
+        from app.models.question import Question
+        quiz = (
+            Quiz.query
+            .options(
+                joinedload(Quiz.questions).joinedload(Question.answers),
+                joinedload(Quiz.category)
+            )
+            .get_or_404(id)
+        )
+        quiz_dict = quiz.to_dict()
+        # Agregar respuestas a cada pregunta
+        quiz_dict["questions"] = [
+            {
+                **q.to_dict(),
+                "answers": [a.to_dict() for a in q.answers]
+            }
+            for q in quiz.questions
+        ]
+        return quiz_dict

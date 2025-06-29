@@ -53,10 +53,10 @@ def get_all_quizzes():
 @quiz_bp.route('/<int:id>', methods=['GET'])
 def get_quiz_by_id(id):
     """
-    Obtiene un cuestionario por ID.
+    Obtiene un cuestionario por ID, incluyendo sus preguntas y las respuestas de cada pregunta.
     """
-    quiz = QuizService.get_quiz(id)
-    return jsonify(quiz.to_dict()), 200
+    quiz = QuizService.get_quiz_with_questions_and_answers(id)
+    return jsonify(quiz), 200
 
 # Ruta para obtener cuestionarios por categoría
 @quiz_bp.route('/category/<int:category_id>', methods=['GET'])
