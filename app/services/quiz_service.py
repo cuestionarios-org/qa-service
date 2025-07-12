@@ -123,6 +123,11 @@ class QuizService:
             except ValueError as e:
                 raise ValueError(f"No se pudo actualizar el estado: {str(e)}")
 
+        # Verificar si el estado del cuestionario es 'listo'
+        if quiz.state == 'listo':
+            if 'question_ids' in data or 'category_id' in data_quiz:
+                raise ValueError("No se pueden modificar preguntas ni la categoría de un cuestionario en estado 'listo'.")
+
         # Manejo de preguntas asociadas
         if 'question_ids' in data:
             new_question_ids = set(data['question_ids'])
